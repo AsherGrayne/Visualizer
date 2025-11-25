@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neural Network Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <h1>Network Architecture Visualizer</h1>
+      <p>Interactive Deep Learning Model Explorer</p>
+      <div class="tabs">
+        <button class="tab-btn active" data-target="model-1">Wide & Deep</button>
+        <button class="tab-btn" data-target="model-2">ResNet Custom</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="visualizer-container">
+        <div id="content-wrapper">
+          <svg id="connections" class="connections-layer"></svg>
+
+          <!-- Model 1: Wide & Deep -->
+          <div id="model-1" class="model-view active">
+            <div class="flow-layout">
+              <!-- Input Section -->
+              <div class="column input-col">
+                <div class="node input-node" data-id="input" id="node-input">
+                  <div class="node-content">
+                    <span class="node-title">Input Features</span>
+                    <span class="node-subtitle">Input Layer</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Middle Section (Branches) -->
+              <div class="column branches-col">
+                <!-- Deep Branch -->
+                <div class="branch deep-branch">
+                  <div class="node dense-node" data-id="dense1" id="node-dense1">
+                    <span class="node-title">Dense 1</span>
+                    <span class="node-subtitle">512 units</span>
+                  </div>
+                  <div class="node se-node" data-id="se1" id="node-se1">
+                    <span class="node-title">SE Block 1</span>
+                    <span class="node-subtitle">8x8</span>
+                  </div>
+                  <div class="node dense-node" data-id="dense2" id="node-dense2">
+                    <span class="node-title">Dense 2</span>
+                    <span class="node-subtitle">512 units</span>
+                  </div>
+                  <div class="node se-node" data-id="se2" id="node-se2">
+                    <span class="node-title">SE Block 2</span>
+                    <span class="node-subtitle">8x8</span>
+                  </div>
+                  <div class="node dense-node" data-id="dense3" id="node-dense3">
+                    <span class="node-title">Dense 3</span>
+                    <span class="node-subtitle">512 units</span>
+                  </div>
+                  <div class="node se-node" data-id="se3" id="node-se3">
+                    <span class="node-title">SE Block 3</span>
+                    <span class="node-subtitle">8x8</span>
+                  </div>
+                  <div class="node logits-node" data-id="deep-logits" id="node-deep-logits">
+                    <span class="node-title">Deep Logits</span>
+                    <span class="node-subtitle">N_Classes</span>
+                  </div>
+                </div>
+
+                <!-- Wide Branch -->
+                <div class="branch wide-branch">
+                  <div class="node wide-node" data-id="wide-linear" id="node-wide-linear">
+                    <span class="node-title">Wide Linear</span>
+                    <span class="node-subtitle">N_Classes</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Merge Section -->
+              <div class="column merge-col">
+                <div class="node add-node" data-id="add" id="node-add">
+                  <span class="icon">+</span>
+                </div>
+              </div>
+
+              <!-- Output Section -->
+              <div class="column output-col">
+                <div class="node output-node" data-id="softmax" id="node-softmax">
+                  <span class="node-title">Softmax Output</span>
+                  <span class="node-subtitle">Probability</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Model 2: ResNet Custom -->
+          <div id="model-2" class="model-view hidden">
+            <div class="vertical-layout">
+              <!-- Header Section -->
+              <div class="node input-node" data-id="m2-input" id="node-m2-input">
+                <span class="node-title">Input features</span>
+              </div>
+              <div class="node norm-node" data-id="m2-norm" id="node-m2-norm">
+                <span class="node-title">Normalization</span>
+              </div>
+              <div class="node dense-node" data-id="m2-stem" id="node-m2-stem">
+                <span class="node-title">Dense stem</span>
+              </div>
+
+              <!-- Stem Post-Process -->
+              <div class="stack-group">
+                <div class="node small-node" data-id="m2-stem-gelu" id="node-m2-stem-gelu">GELU</div>
+                <div class="node small-node" data-id="m2-stem-bn" id="node-m2-stem-bn">Batch Norm</div>
+                <div class="node small-node" data-id="m2-stem-drop" id="node-m2-stem-drop">Dropout</div>
+              </div>
+
+              <!-- Residual Block 1 -->
+              <div class="split-container">
+                <div class="split-column left">
+                  <span class="path-label">Shortcut</span>
+                  <div class="node dense-node" data-id="m2-rb1-short" id="node-m2-rb1-short">
+                    <span class="node-title">Dense (128)</span>
+                  </div>
+                </div>
+                <div class="split-column right">
+                  <span class="path-label">Residual Path</span>
+                  <div class="node dense-node" data-id="m2-rb1-dense" id="node-m2-rb1-dense">
+                    <span class="node-title">Dense (128)</span>
+                  </div>
+                  <div class="node small-node" data-id="m2-rb1-gelu" id="node-m2-rb1-gelu">GELU</div>
+                  <div class="node small-node" data-id="m2-rb1-bn" id="node-m2-rb1-bn">Batch Norm</div>
+                  <div class="node small-node" data-id="m2-rb1-drop" id="node-m2-rb1-drop">Dropout (0.2)</div>
+                </div>
+              </div>
+
+              <div class="node add-node" data-id="m2-rb1-add" id="node-m2-rb1-add">
+                <span class="icon">+</span>
+              </div>
+
+              <div class="stack-group">
+                <div class="node small-node" data-id="m2-rb1-relu" id="node-m2-rb1-relu">ReLU</div>
+                <div class="node small-node" data-id="m2-rb1-post-drop" id="node-m2-rb1-post-drop">Dropout (0.2)</div>
+              </div>
+
+              <!-- Residual Block 2 -->
+              <div class="split-container">
+                <div class="split-column left">
+                  <span class="path-label">Shortcut</span>
+                  <div class="node dense-node" data-id="m2-rb2-short" id="node-m2-rb2-short">
+                    <span class="node-title">Dense (64)</span>
+                  </div>
+                </div>
+                <div class="split-column right">
+                  <span class="path-label">Residual Path</span>
+                  <div class="node dense-node" data-id="m2-rb2-dense" id="node-m2-rb2-dense">
+                    <span class="node-title">Dense (64)</span>
+                  </div>
+                  <div class="node small-node" data-id="m2-rb2-gelu" id="node-m2-rb2-gelu">GELU</div>
+                  <div class="node small-node" data-id="m2-rb2-bn" id="node-m2-rb2-bn">Batch Norm</div>
+                  <div class="node small-node" data-id="m2-rb2-drop" id="node-m2-rb2-drop">Dropout (0.2)</div>
+                </div>
+              </div>
+
+              <div class="node add-node" data-id="m2-rb2-add" id="node-m2-rb2-add">
+                <span class="icon">+</span>
+              </div>
+
+              <!-- Output -->
+              <div class="node output-node" data-id="m2-output" id="node-m2-output">
+                <span class="node-title">Output (softmax)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="details-panel" class="details-panel hidden">
+        <button class="close-btn">&times;</button>
+        <h2 id="detail-title">Component Details</h2>
+        <div id="detail-content">
+          <p>Select a component to view its details.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
