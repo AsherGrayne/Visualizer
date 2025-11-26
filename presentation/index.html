@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Accuracy Comparison - Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #60a5fa;
+      --primary-dark: #3b82f6;
+      --primary-light: #93c5fd;
+      --accent-color: #a78bfa;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-light: #64748b;
+      --bg-light: #1e293b;
+      --bg-white: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .presentation-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      padding: 80px 100px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateX(30px);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide.slide-out {
+      transform: translateX(-30px);
+    }
+
+    .slide-title {
+      font-size: 2.75rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 60px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .slide-content {
+      max-width: 1600px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 60px;
+      justify-content: center;
+    }
+
+    .image-container {
+      flex: 1;
+      max-width: 750px;
+      position: relative;
+    }
+
+    .model-image {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: var(--shadow-xl);
+      background: var(--bg-card);
+      padding: 24px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .model-image:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      border-color: var(--primary-color);
+    }
+
+    .model-description {
+      flex: 1;
+      max-width: 650px;
+      font-size: 1.125rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      text-align: left;
+      background: var(--bg-card);
+      padding: 48px;
+      border-radius: 16px;
+      border-left: 5px solid var(--primary-color);
+      box-shadow: var(--shadow-lg);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .model-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 24px;
+      text-align: left;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .model-description p {
+      margin-top: 0;
+      color: var(--text-secondary);
+    }
+
+    .navigation {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 8px;
+      border-radius: 50px;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.01em;
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .nav-btn:disabled {
+      background: #334155;
+      color: #64748b;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    .slide-indicator {
+      position: fixed;
+      top: 40px;
+      right: 40px;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: var(--primary-color);
+      z-index: 1000;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    .slide-indicator span {
+      font-weight: 700;
+    }
+
+    .title-slide {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #312e81 70%, #581c87 100%);
+      color: white;
+    }
+
+    .title-slide .slide-content {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-slide .slide-title {
+      color: white;
+      font-size: 4rem;
+      margin-bottom: 24px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .title-slide .subtitle {
+      font-size: 1.5rem;
+      opacity: 0.95;
+      margin-top: 16px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--primary-color);
+      z-index: 1001;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+    }
+
+    @media (max-width: 1024px) {
+      .slide {
+        padding: 60px 40px;
+      }
+
+      .slide-content {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+      }
+
+      .image-container {
+        max-width: 100%;
+      }
+
+      .model-description {
+        max-width: 100%;
+        padding: 36px;
+      }
+
+      .slide-title {
+        font-size: 2.25rem;
+        margin-bottom: 40px;
+      }
+
+      .title-slide .slide-title {
+        font-size: 3rem;
+      }
+
+      .navigation {
+        bottom: 20px;
+        padding: 6px;
+      }
+
+      .nav-btn {
+        padding: 12px 24px;
+        font-size: 0.875rem;
+      }
+
+      .slide-indicator {
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .slide {
+        padding: 40px 24px;
+      }
+
+      .model-description {
+        padding: 24px;
+        font-size: 1rem;
+      }
+
+      .model-name {
+        font-size: 1.5rem;
+      }
+
+      .slide-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progress-bar"></div>
+  <div class="presentation-container">
+    <div class="slide-indicator">
+      <span id="current-slide">1</span> / <span id="total-slides">13</span>
+    </div>
+
+    <!-- Title Slide -->
+    <div class="slide active title-slide">
+      <div class="slide-content">
+        <h1 class="slide-title">Model Accuracy Comparison</h1>
+        <p class="subtitle">Epoch vs Accuracy Analysis</p>
+      </div>
+    </div>
+
+    <!-- AdaBoost Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/adaboost_accuracy.png" alt="AdaBoost Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">AdaBoost (Adaptive Boosting)</div>
+          <p>AdaBoost is an ensemble learning method that combines multiple weak classifiers to create a strong classifier. It works by iteratively training classifiers on weighted versions of the training data, focusing more on misclassified examples. Each subsequent classifier is trained to correct the errors of the previous ones, making it highly effective for classification tasks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- XGBoost Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/xgboost_accuracy.png" alt="XGBoost Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">XGBoost (Extreme Gradient Boosting)</div>
+          <p>XGBoost is an optimized gradient boosting framework that uses tree-based learning algorithms. It's designed for speed and performance, implementing parallel tree construction and regularization techniques to prevent overfitting. XGBoost is widely used in machine learning competitions and production systems due to its superior performance and efficiency.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LightGBM Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/lightgbm_accuracy.png" alt="LightGBM Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">LightGBM (Light Gradient Boosting Machine)</div>
+          <p>LightGBM is a gradient boosting framework that uses tree-based learning algorithms. It's designed to be faster and more memory-efficient than other gradient boosting implementations. LightGBM uses leaf-wise tree growth instead of level-wise, which can lead to better accuracy and faster training times, especially on large datasets.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KNN Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/knn_initiators_accuracy.png" alt="KNN Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">KNN (K-Nearest Neighbors)</div>
+          <p>KNN is a simple, instance-based learning algorithm that classifies data points based on the majority class of their k nearest neighbors. It's a non-parametric method that makes no assumptions about the underlying data distribution. KNN is effective for classification tasks but can be computationally expensive for large datasets as it requires storing all training examples.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logistic Regression Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/logreg_initiators_accuracy.png" alt="Logistic Regression Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">Logistic Regression</div>
+          <p>Logistic Regression is a linear classification algorithm that uses the logistic function to model the probability of a binary or multiclass outcome. It's a simple yet powerful method that works well for linearly separable data. Logistic regression is interpretable, fast to train, and provides probability estimates, making it a popular choice for many classification problems.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SGD Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/sgd_accuracy.png" alt="SGD Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">SGD (Stochastic Gradient Descent)</div>
+          <p>SGD is an optimization algorithm used to train machine learning models, particularly neural networks and linear models. Unlike batch gradient descent, SGD updates model parameters using a single training example at a time, making it faster and more memory-efficient. It's particularly useful for large datasets and online learning scenarios.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Algorithm 2 Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Epoch_vs_accuracy/algorithm_2_accuracy.png" alt="Algorithm 2 Accuracy" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">Algorithm 2</div>
+          <p>This algorithm represents a custom or alternative approach to the classification problem. The performance metrics shown in the accuracy plot demonstrate its effectiveness in learning from the training data over multiple epochs. The convergence pattern indicates how well the algorithm adapts and improves its predictions during the training process.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Title: Why are the new MLP models necessary? -->
+    <div class="slide title-slide">
+      <div class="slide-content">
+        <h1 class="slide-title">Why are the new MLP models necessary?</h1>
+        <p class="subtitle">A Comparative Analysis</p>
+      </div>
+    </div>
+
+    <!-- Model Comparison Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../model_comparison_plot.png" alt="Model Accuracy Comparison" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">Model Accuracy Comparison</div>
+          <p>This comprehensive comparison shows the performance of traditional machine learning models versus our new MLP architectures. The SE + WideDeep model achieves the highest accuracy at 0.554, outperforming all traditional ML models including Gradient Boosting (0.549) and Logistic Regression (0.533). This demonstrates the effectiveness of our custom neural network architectures in capturing complex patterns that traditional models may miss.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Title: Dataset Description -->
+    <div class="slide title-slide">
+      <div class="slide-content">
+        <h1 class="slide-title">Dataset Description</h1>
+        <p class="subtitle">Understanding the Data</p>
+      </div>
+    </div>
+
+    <!-- Feature Categories Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../feature_categories.png" alt="Feature Categories" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">Feature Categories</div>
+          <p>The dataset includes multiple categories of features: Physiological metrics (HRV, GSR, Blood Pressure, Heart Rate, Respiration Rate, Skin Temperature, Oxygen Saturation), EEG Power Bands, Environmental factors (Ambient Noise), and Behavioral metrics (Focus Duration). The target variable is Psychological State, which categorizes the mental state of the subject. This comprehensive multi-modal approach allows for a holistic analysis of the relationship between physiological signals and psychological states.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset Sample Slide -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="image-container">
+          <img src="../Screenshot 2025-11-26 062038.png" alt="Dataset Sample" class="model-image">
+        </div>
+        <div class="model-description">
+          <div class="model-name">Dataset Sample</div>
+          <p>The dataset contains 25 rows of multi-dimensional sensor data with 12 columns including various physiological measurements (HRV, GSR, EEG Power, Blood Pressure, Oxygen Saturation, Heart Rate, Respiration Rate, Skin Temperature), environmental factors (Ambient Noise), behavioral metrics (Focus Duration), and the target variable (Psychological State). The data includes states such as "Stressed", "Relaxed", "Anxious", and "Focused", making it suitable for classification tasks to predict psychological states from physiological signals.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)">Previous</button>
+      <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progress-bar');
+
+    document.getElementById('total-slides').textContent = totalSlides;
+
+    function updateProgress() {
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = progress + '%';
+    }
+
+    function showSlide(n) {
+      const previousSlide = currentSlide;
+      
+      if (n >= totalSlides) currentSlide = 0;
+      else if (n < 0) currentSlide = totalSlides - 1;
+      else currentSlide = n;
+      
+      // Remove active class from all slides
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active', 'slide-out');
+        if (index === previousSlide && index !== currentSlide) {
+          slide.classList.add('slide-out');
+        }
+      });
+      
+      // Add active class to current slide
+      setTimeout(() => {
+        slides[currentSlide].classList.add('active');
+      }, 50);
+      
+      document.getElementById('current-slide').textContent = currentSlide + 1;
+      updateProgress();
+      
+      // Update button states
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(direction) {
+      const newSlide = currentSlide + direction;
+      showSlide(newSlide);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        if (currentSlide < totalSlides - 1) {
+          changeSlide(1);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentSlide > 0) {
+          changeSlide(-1);
+        }
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        showSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        showSlide(totalSlides - 1);
+      }
+    });
+
+    // Prevent context menu on right click
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    // Initialize
+    showSlide(0);
+    updateProgress();
+  </script>
+</body>
+</html>
+
